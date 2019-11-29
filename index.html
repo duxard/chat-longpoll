@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <div id="wrapper">
+    <p>Welcome to chat</p>
+    <form name="form" id="form">
+      <input type="text" name="message" autocomplete="off"/>
+      <input type="submit" value="Send" />
+    </form>
+    <ul id="messages"></ul>
+  </div>
+
+  <script>
+
+    function sendMessage(message) {
+      alert(message);
+    }
+
+    form.onsubmit = function() {
+      let message = form.message.value;
+      if (message) {
+        form.message.value = '';
+        sendMessage(message);
+      }
+      return false;
+    }
+
+  </script>
+</body>
+</html>
