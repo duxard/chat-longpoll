@@ -16,18 +16,59 @@
 
   <script>
 
-    function sendMessage(message) {
-      alert(message);
+    window.onload = function() {
+      const messageList = document.getElementById("messages");
+      const subscribeURL = "/subscribe";
+
+      function sendMessage(message) {
+        fetch('/publish', {
+          method: 'POST',
+          body: message
+        });
+      }
+
+      form.onsubmit = function() {
+        let message = form.message.value;
+        if (message) {
+          form.message.value = '';
+          sendMessage(message);
+        }
+        return false;
+      }
+
+      function showMessage(rootElem, message) {
+        let messageElem = document.createElement('li');
+        messageElem.append(message);
+        rootElem.append(messageElem);
+      }
+
+      async function subscribe(url) {
+        let response = await fetch('/subscribe');
+        if (response.status == 502) {
+          // Connection timeout
+          // happens when the connection was pending for too long
+          // let's reconnect
+          console.log("response.status == 502");
+          await subscribe();
+        } else if (response.status != 200) {
+          // Show Error
+          console.log("response.status != 200");
+          showMessage(messageList, response.statusText);
+          // Reconnect in one second
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await subscribe();
+        } else {
+          // Got message
+          console.log("success");
+          let message = await response.text();
+          showMessage(messageList, message);
+          await subscribe();
+        }
+      }
+      subscribe(subscribeURL);
     }
 
-    form.onsubmit = function() {
-      let message = form.message.value;
-      if (message) {
-        form.message.value = '';
-        sendMessage(message);
-      }
-      return false;
-    }
+
 
   </script>
 </body>
