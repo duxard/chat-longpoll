@@ -1,4 +1,8 @@
 const http = require("http");
+const fs = require("fs");
+
+const port = 3000;
+const host = "127.0.0.1";
 
 const server = http.createServer((req, res) => {
   // res.writeHead(200, {"Content-Type": "text/plaintext"});
@@ -6,7 +10,7 @@ const server = http.createServer((req, res) => {
 
   switch (req.url) {
     case '/':
-      res.end("Home page");
+      sendFile("index.html", res);
       break;
     case '/info':
       res.end("Info page");
@@ -16,4 +20,25 @@ const server = http.createServer((req, res) => {
       res.end("Not found");
   }
 
-}).listen(3000, "127.0.0.1");
+}).listen(port, host, () => {
+  console.log(`Server is up and running at ${host}:${port}`);
+});
+
+function sendFile(fileName, res) {
+  // This line opens the file as a readable stream
+  let readStream = fs.createReadStream(fileName);
+  // This will wait until we know the readable stream is actually valid before piping
+  readStream.on('open', function () {
+    // This just pipes the read stream to the response object (which goes to the client)
+    readStream.pipe(res);
+  });
+  // This catches any errors that happen while creating the readable stream (usually invalid names)
+  readStream.on('error', function(err) {
+    res.statusCode = 500;
+    res.end(err);
+  });
+
+  readStream.on('close', function() {
+    readStream.destroy();
+  });
+}
